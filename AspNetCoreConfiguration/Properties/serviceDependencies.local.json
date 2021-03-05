@@ -3,6 +3,9 @@
     "mssql1": {
       "type": "mssql.local",
       "connectionId": "AspNetCoreIdentityContextConnection"
+    },
+    "secrets1": {
+      "type": "secrets.user"
     }
   }
 }
