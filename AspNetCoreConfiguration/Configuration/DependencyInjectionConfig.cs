@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using KissLog;
+using KissLog.AspNetCore;
+using KissLog.CloudListeners.Auth;
+using KissLog.CloudListeners.RequestLogsListener;
 
 namespace AspNetCoreConfiguration.Configuration
 {
@@ -17,30 +21,18 @@ namespace AspNetCoreConfiguration.Configuration
             //Register the class by Interface
             services.AddSingleton<IAuthorizationHandler, NecessessaryPermissionHandler>(); //Claims
 
-            return services;
-        }
-
-        public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.Configure<CookiePolicyOptions>(options =>
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<ILogger>((context) =>
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+                return Logger.Factory.Get();
             });
 
-            //Add EF to Asp.Net Context  
-            services.AddDbContext<AspNetCoreIdentityContext>(options =>
-                    options.UseSqlServer(
-                        configuration.GetConnectionString("AspNetCoreIdentityContextConnection")));
-
-            //Configuring the Identity on the application            
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddRoles<IdentityRole>() //This key suport is apply when we implement Authorization
-                .AddDefaultUI(Microsoft.AspNetCore.Identity.UI.UIFramework.Bootstrap4)
-                .AddEntityFrameworkStores<AspNetCoreIdentityContext>();
+            services.AddLogging(logging =>
+            {
+                logging.AddKissLog();
+            });
 
             return services;
-        }
+        }       
     }
 }
